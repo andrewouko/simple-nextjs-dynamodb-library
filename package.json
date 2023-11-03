@@ -1,0 +1,44 @@
+{
+  "name": "nextjs-dynamodb-bookstore",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "setup-library-table": "tsc --build --clean && tsc ./config/setup_library_table.ts && node ./config/setup_library_table.js && tsc --build --clean"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.438.0",
+    "@aws-sdk/lib-dynamodb": "^3.438.0",
+    "@aws/dynamodb-data-mapper": "^0.7.3",
+    "@chakra-ui/icons": "^2.1.1",
+    "@chakra-ui/next-js": "^2.1.5",
+    "@chakra-ui/react": "^2.8.1",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@hookform/resolvers": "^3.3.2",
+    "@reduxjs/toolkit": "^1.9.7",
+    "@tanstack/react-table": "^8.10.7",
+    "framer-motion": "^10.16.4",
+    "i": "^0.3.7",
+    "next": "14.0.1",
+    "npm": "^10.2.3",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-hook-form": "^7.47.0",
+    "react-redux": "^8.1.3",
+    "uuid": "^9.0.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/uuid": "^9.0.6",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.1",
+    "typescript": "^5"
+  }
+}
