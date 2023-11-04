@@ -54,7 +54,7 @@ export const BookAPI = createApi({
       },
     }),
     deleteBook: builder.mutation({
-      query: (request_body: BookID) => {
+      query: (request_body: Borrow) => {
         return {
           url: `/book`,
           method: "DELETE",

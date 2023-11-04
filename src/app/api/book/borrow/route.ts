@@ -11,9 +11,9 @@ import {
 import {
     formatNotFoundResponse,
     formatRequestBody,
+    getUser,
     isBookExist,
-    jsonResponse,
-    validateDeleteRequest,
+    jsonResponse
 } from "@lib/utils";
 import { SafeParseReturnType } from "zod";
 
@@ -21,7 +21,7 @@ import { SafeParseReturnType } from "zod";
 export async function PUT(req: Request): Promise<Response> {
   let request_body = await formatRequestBody<Borrow>(req);
   if (request_body instanceof Response) return request_body;
-  const validation_result = validatePutRequest(request_body);
+  const validation_result = validateRequest(request_body);
   if (!validation_result.success) {
     return jsonResponse(
       ErrorStatusCodes.BAD_REQUEST,
@@ -77,11 +77,11 @@ export async function PUT(req: Request): Promise<Response> {
 
 // Delete a borrowing
 export async function DELETE(req: Request): Promise<Response> {
-  let request_body = await formatRequestBody<BookID>(req);
+  let request_body = await formatRequestBody<Borrow>(req);
   if (request_body instanceof Response) return request_body;
 
   // valdate the request
-  const validation_result = validateDeleteRequest(request_body);
+  const validation_result = validateRequest(request_body);
   if (!validation_result.success) {
     return jsonResponse(
       ErrorStatusCodes.BAD_REQUEST,
@@ -99,6 +99,14 @@ export async function DELETE(req: Request): Promise<Response> {
       return formatNotFoundResponse(request_body.BookID, request_body.ISBN);
     }
 
+    // check that the current book has a BorrowRecord
+    if(current_book.BorrowedRecord === undefined) return jsonResponse(ErrorStatusCodes.BAD_REQUEST, `The book has not been borrowed`);
+
+    // check if the user returning the book
+    // is the one that borrowed it
+    const isSameUSer = current_book.BorrowedRecord && (current_book.BorrowedRecord.BorrowerID === request_body.BorrowerID)
+    if(!isSameUSer) return jsonResponse(ErrorStatusCodes.BAD_REQUEST, `The user returning the book must same user. Currently borrowed by user: ${getUser(current_book.BorrowedRecord.BorrowerID)?.name || current_book.BorrowedRecord.BorrowerID}`);
+
     const updated_book = await deleteBorrowedRecordFromBook(
       request_body.BookID,
       request_body.ISBN
@@ -111,7 +119,7 @@ export async function DELETE(req: Request): Promise<Response> {
   }
 }
 
-const validatePutRequest = (
+const validateRequest = (
   request_body: Borrow
 ): SafeParseReturnType<Borrow, Borrow> => {
   return BorrowSchema.safeParse(request_body);

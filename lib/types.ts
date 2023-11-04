@@ -21,33 +21,50 @@ const isbn_regex = new RegExp(
   "g"
 );
 
+export enum BorrowingStatus {
+  Available = "Available",
+  CheckedOut = "Checked Out",
+}
+
 const user_regex = new RegExp(`^user\\d{1,}$`, "g");
 
+const user_prop_type = z.string().regex(user_regex);
+
+export const isbn_prop_type = z.string().regex(isbn_regex);
+
+export const borrowing_status_prop_type = z.nativeEnum(BorrowingStatus);
+
 const BorrowedRecordchema = z.object({
-  BorrowerID: z.string().regex(user_regex),
+  BorrowerID: user_prop_type,
   BorrowedDate: z.date(),
   ReturnDate: z.date(),
 });
 
 export type BorrowedRecord = z.infer<typeof BorrowedRecordchema>;
 
-export enum BorrowingStatus {
-  Available = "Available",
-  CheckedOut = "Checked Out",
-}
 export const BookIDSchema = z.object({
   BookID: z.string().uuid(),
-  ISBN: z.string().regex(isbn_regex),
+  ISBN: isbn_prop_type,
 });
 
 export type BookID = z.infer<typeof BookIDSchema>;
+
+export const BorrowSchema = BookIDSchema.merge(
+  z.object({
+    BorrowerID: user_prop_type,
+    BorrowedDate: z.date().optional(),
+    ReturnDate: z.date().optional(),
+  })
+);
+
+export type Borrow = z.infer<typeof BorrowSchema>;
 
 export const BookSchema = BookIDSchema.merge(
   z.object({
     Title: z.string(),
     Author: z.string(),
     BorrowedRecord: BorrowedRecordchema.optional(),
-    BorrowingStatus: z.nativeEnum(BorrowingStatus),
+    BorrowingStatus: borrowing_status_prop_type,
     ImageURL: z.string().url(),
   })
 );
@@ -86,30 +103,22 @@ export type SuccessResponse<T> = {
 };
 export type UpdateBook = Omit<Book, "BorrowedRecord">;
 export const GetBookSchema = z.object({
-  ISBN: z.string().regex(isbn_regex).optional(),
+  ISBN: isbn_prop_type.optional(),
   Title: z.string().optional(),
   Author: z.string().optional(),
-  BorrowingStatus: z.nativeEnum(BorrowingStatus).optional(),
+  BorrowingStatus: borrowing_status_prop_type.optional(),
 });
 export type GetBook = z.infer<typeof GetBookSchema>;
-export const BorrowSchema = BookIDSchema.merge(
-  z.object({
-    BorrowerID: z.string().regex(user_regex),
-    BorrowedDate: z.coerce.date().optional(),
-    ReturnDate: z.coerce.date().optional()
-  })
-);
-export type Borrow = z.infer<typeof BorrowSchema>;
 
-export type AttributeValuesType = Record<string, AttributeValue> | undefined
+export type AttributeValuesType = Record<string, AttributeValue> | undefined;
 
 export type User = {
-    name: string;
-    image_url: string;
-    id: string;
-}
+  name: string;
+  image_url: string;
+  id: string;
+};
 
 export type ContextValue<T> = {
-    data: T;
-    setData: React.Dispatch<React.SetStateAction<T>>;
-  };
+  data: T;
+  setData: React.Dispatch<React.SetStateAction<T>>;
+};

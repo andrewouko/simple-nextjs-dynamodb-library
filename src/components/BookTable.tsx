@@ -6,6 +6,9 @@ import {
   Progress,
   useDisclosure,
   useToast,
+  Text,
+  Link,
+  useMediaQuery,
 } from "@chakra-ui/react";
 import { RefetchContext, UserContext } from "@lib/contexts";
 import {
@@ -20,13 +23,16 @@ import {
   BorrowingStatus,
   UpdateBook,
 } from "@lib/types";
-import { getUser, useContextSafely } from "@lib/utils";
+import { getQueryErrorToastOptions, getUser, useContextSafely } from "@lib/utils";
 import { createColumnHelper } from "@tanstack/react-table";
 import React, { useEffect } from "react";
 import BookFormModal from "./BookFormModal";
 import BorrowedRecordModal from "./BorrowedRecordModal";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { DataTable } from "./DataTable";
+import { DeleteIcon, EditIcon, ViewIcon } from "@chakra-ui/icons";
+
+const LARGE_SCREEN_WIDTH = window.innerWidth > 768;
 
 export default function BookTable({ data }: Props) {
   const { data: userId } = useContextSafely(UserContext);
@@ -63,8 +69,10 @@ export default function BookTable({ data }: Props) {
   const [updateBook, setUpdateBook] = React.useState<UpdateBook | undefined>(
     undefined
   );
-  const [deleteId, setDeleteId] = React.useState<BookID | undefined>(undefined);
+  const [deleteId, setDeleteId] = React.useState<Borrow | undefined>(undefined);
   const { data: refetch } = useContextSafely(RefetchContext);
+  const [isLargerThan768] = useMediaQuery('(min-width: 768px)')
+
   const handleViewBorrower = (borrower: BorrowedRecord, BookID: BookID) => {
     setSelectedBorrower(borrower);
     setSelectedBookID(BookID);
@@ -81,64 +89,37 @@ export default function BookTable({ data }: Props) {
   const handleBorrow = async (data: Borrow) => {
     borrowBook(data);
   };
-  const handleDeleteConfirm = (data: BookID) => {
-    setDeleteId(data)
-    onConfirmOpen()
+  const handleDeleteConfirm = (data: Borrow) => {
+    setDeleteId(data);
+    onConfirmOpen();
   };
   const handleDeleteBook = () => {
-    if(deleteId !== undefined)
-      deleteBook(deleteId);
-  }
+    if (deleteId !== undefined) deleteBook(deleteId);
+  };
 
   useEffect(() => {
-    if (isDeleteError) {
-      toast({
-        title: "Delete Book Error",
-        description: `An error occurred while deleting the book`,
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
+    if (isDeleteError && deleteError) {
+      toast(getQueryErrorToastOptions("Delete Book Error", deleteError));
     }
     if (deleteResult || isDeleteError) {
       refetch();
       onClose();
     }
-  }, [isDeleteError, deleteResult, onClose, refetch, toast]);
+  }, [isDeleteError, deleteResult, onClose, refetch, toast, deleteError]);
 
   useEffect(() => {
-    if (isError) {
-      toast({
-        title: "Add Borrowing Error",
-        description: `Borrowing by user: ${current_user?.name} failed.`,
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
+    if (isError && error) {
+      toast(getQueryErrorToastOptions("Add Borrowing Error", error));
     }
     if (result) {
       refetch();
     }
-  }, [isError, result, current_user, toast, refetch]);
+  }, [isError, result, current_user, toast, refetch, error]);
 
   const columnHelper = createColumnHelper<Book>();
-  const columns = [
-    columnHelper.accessor("ISBN", {
-      header: "ISBN Code",
-    }),
+  const mobile_columns = [
     columnHelper.accessor("Title", {
       header: "Title",
-    }),
-    columnHelper.accessor("Author", {
-      header: "Author",
-    }),
-    columnHelper.accessor("BorrowingStatus", {
-      header: "Borrowing Status",
-      cell: (info) => (
-        <Badge colorScheme={info.getValue() === "Available" ? "green" : "red"}>
-          {info.getValue()}
-        </Badge>
-      ),
     }),
     columnHelper.accessor("BookID", {
       header: "Actions",
@@ -149,7 +130,7 @@ export default function BookTable({ data }: Props) {
             size="sm"
             onClick={() => handleEditBook(info.row.original)}
           >
-            Edit
+            <EditIcon />
           </Button>
           {info.row.original.BorrowingStatus == BorrowingStatus.Available && (
             <Button
@@ -168,7 +149,7 @@ export default function BookTable({ data }: Props) {
           )}
           {info.row.original.BorrowingStatus == BorrowingStatus.CheckedOut && (
             <Button
-              colorScheme="blue"
+              colorScheme="teal"
               size="sm"
               onClick={() => {
                 const borrower = info.row.original.BorrowedRecord;
@@ -177,7 +158,7 @@ export default function BookTable({ data }: Props) {
                 if (borrower) handleViewBorrower(borrower, { BookID, ISBN });
               }}
             >
-              View Borrower
+              <ViewIcon />
             </Button>
           )}
           <Button
@@ -187,17 +168,50 @@ export default function BookTable({ data }: Props) {
               handleDeleteConfirm({
                 BookID: info.row.original.BookID,
                 ISBN: info.row.original.ISBN,
+                BorrowerID: userId
               });
             }}
           >
-            Delete
+            <DeleteIcon />
           </Button>
         </HStack>
       ),
     }),
-  ];
+  ]
+  const columns = isLargerThan768 ? [
+    mobile_columns[0],
+    columnHelper.accessor("ISBN", {
+      header: "ISBN Code",
+    }),
+    columnHelper.accessor("Author", {
+      header: "Author",
+    }),
+    columnHelper.accessor("ImageURL", {
+      header: "Image URL",
+      cell: (info) => {
+        const url =  new URL(info.getValue());
+        return (
+          <Text>
+            Link:{" "}
+            <Link color="teal.500" href={info.getValue()} isExternal>
+              {url.hostname}
+            </Link>
+          </Text>
+        );
+      },
+    }),
+    columnHelper.accessor("BorrowingStatus", {
+      header: "Borrowing Status",
+      cell: (info) => (
+        <Badge colorScheme={info.getValue() === "Available" ? "green" : "red"}>
+          {info.getValue()}
+        </Badge>
+      ),
+    }),
+    mobile_columns[1]
+  ] : mobile_columns;
 
-  if (isLoading) return <Progress size="lg" isIndeterminate />;
+  if (isLoading || isDeleteLoading) return <Progress size="lg" isIndeterminate />;
 
   return (
     <>

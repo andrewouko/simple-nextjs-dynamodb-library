@@ -19,7 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { RefetchContext } from "@lib/contexts";
 import { usePostBookMutation, usePutBookMutation } from "@lib/redux/ApiSlice";
 import { BookSchema, BorrowingStatus, UpdateBook } from "@lib/types";
-import { useContextSafely } from "@lib/utils";
+import { getQueryErrorToastOptions, useContextSafely } from "@lib/utils";
 import React, { useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
@@ -52,23 +52,14 @@ const BookFormModal: React.FC<EditBookModalProps> = ({
   const { data: refetch } = useContextSafely(RefetchContext);
   const toast = useToast();
   useEffect(() => {
-    if (isError || isCreateError) {
-      toast({
-        title:
-          initialData === undefined ? "Create Book Error" : "Update Book Error",
-        description: `An error occurred during the ${
-          initialData === undefined ? "creation" : "updating"
-        } of a book.`,
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
+    if ((isError || isCreateError) && createError){
+      toast(getQueryErrorToastOptions(initialData === undefined ? "Create Book Error" : "Update Book Error", createError));
     }
     if (result || createResult) {
       refetch();
       onClose();
     }
-  }, [isError, toast, onClose, result, refetch, initialData, isCreateError, createResult]);
+  }, [isError, toast, onClose, result, refetch, initialData, isCreateError, createResult, createError]);
 
   const onSubmit: SubmitHandler<UpdateBook> = (data) => {
     // console.log(data);

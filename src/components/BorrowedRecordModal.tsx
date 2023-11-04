@@ -13,10 +13,10 @@ import {
   useToast,
   Progress,
 } from "@chakra-ui/react";
-import { Book, BookID, BorrowedRecord } from "@lib/types";
-import { getUser, useContextSafely } from "@lib/utils";
+import { Book, BookID, Borrow, BorrowedRecord } from "@lib/types";
+import { getQueryErrorToastOptions, getUser, useContextSafely } from "@lib/utils";
 import { useDeleteBorrowMutation } from "@lib/redux/ApiSlice";
-import { RefetchContext } from "@lib/contexts";
+import { RefetchContext, UserContext } from "@lib/contexts";
 
 export default function BorrowedRecordModal({
   isOpen,
@@ -27,28 +27,27 @@ export default function BorrowedRecordModal({
   const [returnBook, { isLoading, isError, error, data: result }] =
     useDeleteBorrowMutation();
   const { data: refetch } = useContextSafely(RefetchContext);
-  const handleReturnBook = async (data: BookID) => {
+  const { data: userId } = useContextSafely(UserContext);
+  const handleReturnBook = async (data: Borrow) => {
     returnBook(data);
   };
   const toast = useToast();
   useEffect(() => {
-    if (isError) {
-      toast({
-        title: "Return Error",
-        description: `An error occurred during the return.`,
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
+    if (isError && error) {
+      toast(getQueryErrorToastOptions('Return book error', error));
     }
-    if (isError || result){
-        refetch()
-        onClose()
+    if (isError || result) {
+      onClose();
     }
-  }, [isError, toast, onClose, result, refetch]);
+    if(result){
+      refetch()
+    }
+  }, [isError, toast, onClose, result, refetch, error]);
+
+  console.log(error)
 
   if (isLoading) return <Progress size="lg" isIndeterminate />;
-  
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
@@ -68,7 +67,10 @@ export default function BorrowedRecordModal({
           </Text>
         </ModalBody>
         <ModalFooter>
-          <Button colorScheme="red" onClick={() => handleReturnBook(BookID)}>
+          <Button
+            colorScheme="red"
+            onClick={() => handleReturnBook({ ...BookID, BorrowerID: userId })}
+          >
             Return Book
           </Button>
         </ModalFooter>

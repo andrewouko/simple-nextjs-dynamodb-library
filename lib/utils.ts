@@ -1,3 +1,4 @@
+import { UseToastOptions } from "@chakra-ui/react";
 import { ISBNIndex, Users } from "@lib/constants";
 import { getBookByBookID, queryLibraryTable } from "@lib/db/crud";
 import {
@@ -14,6 +15,8 @@ import {
   SuccessResponse,
   SuccessStatusCodes,
 } from "@lib/types";
+import { SerializedError } from "@reduxjs/toolkit";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import React from "react";
 import { SafeParseReturnType } from "zod";
 
@@ -153,18 +156,32 @@ export const formatNotFoundResponse = (BookID: string, ISBN: string) =>
     `Book with ID: ${BookID} and ISBN: ${ISBN} not found`
   );
 
-export const validateDeleteRequest = (
-  request_body: BookID
-): SafeParseReturnType<BookID, BookID> => {
-  return BookIDSchema.safeParse(request_body);
-};
-
-export function createContext<T>(){
-  return React.createContext<ContextValue<T> | undefined>(
-    undefined
-  );
+export function createContext<T>() {
+  return React.createContext<ContextValue<T> | undefined>(undefined);
 }
 
-export function getUser(userId: string){
+export function getUser(userId: string) {
   return Users.find((user) => user.id === userId);
+}
+
+function formatQueryError(error: FetchBaseQueryError | SerializedError): string{
+  let msg = 'An error ocurred';
+  if ('status' in error) {
+    // you can access all properties of `FetchBaseQueryError` here
+    msg = error.data ? JSON.stringify(error.data) : msg
+  }
+  try{
+    msg = JSON.stringify(JSON.parse(msg).error)
+  } catch(err: any){}
+  return msg
+}
+
+export function getQueryErrorToastOptions(title: string, error: FetchBaseQueryError | SerializedError): UseToastOptions{
+  return {
+    title: title,
+    description: `${error && formatQueryError(error)}`,
+    status: "error",
+    duration: 5000,
+    isClosable: true,
+  }
 }

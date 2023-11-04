@@ -50,3 +50,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 1. Each Book has only one copy available
 2. A Book can only be borrowed by one User
 3. Once borrowed a book is marked as unavailable and cannot be borrowed by another user
+4. Only a user who borrowed a book can return it
+
+## API Pages Collection
+https://api.postman.com/collections/3741573-cd9631c1-b934-4cff-8fb9-2945ce6b9bb0?access_key=PMAT-01HECEVA3N0GG9JNGSHN2GFNZM

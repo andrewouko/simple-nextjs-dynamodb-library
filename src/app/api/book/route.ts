@@ -1,28 +1,34 @@
 import {
-    AuthorIndex,
-    BorrowingStatusIndex,
-    ISBNIndex,
-    TitleIndex,
+  AuthorIndex,
+  BorrowingStatusIndex,
+  ISBNIndex,
+  TitleIndex,
 } from "@lib/constants";
 import {
-    deleteBookByBookID,
-    getAllItemsFromLibraryTable,
-    insertNewBook,
-    queryLibraryTable,
-    updateBook
+  deleteBookByBookID,
+  getAllItemsFromLibraryTable,
+  insertNewBook,
+  queryLibraryTable,
+  updateBook,
 } from "@lib/db/crud";
 import {
-    Book,
-    BookID,
-    BookSchema,
-    BorrowingStatus,
-    ErrorStatusCodes,
-    GetBook,
-    GetBookSchema,
-    SuccessStatusCodes,
-    UpdateBook
+  Book,
+  BookID,
+  BookIDSchema,
+  BookSchema,
+  BorrowingStatus,
+  ErrorStatusCodes,
+  GetBook,
+  GetBookSchema,
+  SuccessStatusCodes,
+  UpdateBook,
 } from "@lib/types";
-import { formatNotFoundResponse, formatRequestBody, isBookExist, jsonResponse, validateDeleteRequest } from "@lib/utils";
+import {
+  formatNotFoundResponse,
+  formatRequestBody,
+  isBookExist,
+  jsonResponse
+} from "@lib/utils";
 import { v4 as uuidv4 } from "uuid";
 import { SafeParseReturnType } from "zod";
 
@@ -44,7 +50,7 @@ export async function POST(req: Request): Promise<Response> {
 
   try {
     // check if book exists based on isbn provided
-    const current_book = await isBookExist(request_body.ISBN)
+    const current_book = await isBookExist(request_body.ISBN);
     if (current_book !== undefined) {
       // return found book to make endpoint idempotent
       return jsonResponse<Book>(SuccessStatusCodes.OK, current_book);
@@ -75,7 +81,10 @@ export async function PUT(req: Request): Promise<Response> {
 
   try {
     // check if book exists based on ID provided
-    const current_book = await isBookExist(request_body.ISBN, request_body.BookID)
+    const current_book = await isBookExist(
+      request_body.ISBN,
+      request_body.BookID
+    );
     if (current_book === undefined) {
       return formatNotFoundResponse(request_body.BookID, request_body.ISBN);
     }
@@ -123,7 +132,10 @@ export async function DELETE(req: Request): Promise<Response> {
 
   try {
     // check if book exists based on ID provided
-    const current_book = await isBookExist(request_body.ISBN, request_body.BookID)
+    const current_book = await isBookExist(
+      request_body.ISBN,
+      request_body.BookID
+    );
     if (current_book === undefined) {
       return formatNotFoundResponse(request_body.BookID, request_body.ISBN);
     }
@@ -151,7 +163,7 @@ export async function GET(req: Request): Promise<Response> {
       JSON.parse(validation_result.error.message)
     );
   }
-  
+
   let results: Book[] = [];
 
   const queryAndAddToResults = async (
@@ -210,4 +222,10 @@ const validateGetRequest = (
   request_body: GetBook
 ): SafeParseReturnType<GetBook, GetBook> => {
   return GetBookSchema.safeParse(request_body);
+};
+
+const validateDeleteRequest = (
+  request_body: BookID
+): SafeParseReturnType<BookID, BookID> => {
+  return BookIDSchema.safeParse(request_body);
 };

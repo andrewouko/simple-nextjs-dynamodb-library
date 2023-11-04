@@ -9,6 +9,7 @@ import {
   HStack,
   IconButton,
   Image,
+  Link,
   Menu,
   MenuButton,
   MenuDivider,
@@ -24,7 +25,6 @@ import { User } from "@lib/types";
 import { getUser, useContextSafely } from "@lib/utils";
 import NextLink from "next/link";
 import { useEffect, useState } from "react";
-import BookFormModal from "./BookFormModal";
 
 interface Props {
   children: React.ReactNode;
@@ -34,11 +34,14 @@ interface NavLinkProps extends Props {
   href: string;
 }
 
-const Links = [{label: 'Books', href:'/'}, {label: "Users", href:'/users'},];
+const Links = [
+  { label: "Books", href: "/" },
+  // { label: "Users", href: "/users" },
+];
 
 const default_user_id = "user1";
 
-const NavLink = ( {children, href}: NavLinkProps) => {
+const NavLink = ({ children, href }: NavLinkProps) => {
   return (
     <Box
       as="a"
@@ -49,16 +52,19 @@ const NavLink = ( {children, href}: NavLinkProps) => {
         textDecoration: "none",
         bg: useColorModeValue("gray.200", "gray.700"),
       }}
-      href={href}
     >
-      {children}
+      <Link as={NextLink} href={href}>
+        {children}
+      </Link>
     </Box>
   );
 };
 
 const NavLinks = Links.map((link) => (
-  <NavLink key={link.label} href={link.href}>{link.label}</NavLink>
-))
+  <NavLink key={link.label} href={link.href}>
+    {link.label}
+  </NavLink>
+));
 
 export default function Layout({ children }: Props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
