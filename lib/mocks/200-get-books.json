@@ -1,0 +1,39 @@
+{
+  "status": 200,
+  "data": [
+    {
+      "BookID": "52e7f43e-4450-4622-8cf9-4d5b50daa8cb",
+      "ISBN": "978-1-933624-76-3",
+      "BorrowingStatus": "Available",
+      "Title": "Concrete mathematics",
+      "Author": "John Doe",
+      "ImageURL": "https://openlibrary.org/books/OL31826346M/ABC_Danny"
+    },
+    {
+      "BookID": "a7e0b33e-6539-43f9-8530-35973651de36",
+      "ISBN": "978-1-933624-76-2",
+      "BorrowingStatus": "Checked Out",
+      "Title": "Sample Book",
+      "Author": "Sample Author",
+      "ImageURL": "https://www.google.com",
+      "BorrowedRecord": {
+        "BorrowerID": "user2",
+        "BorrowedDate": "2023-11-04T11:01:17.961Z",
+        "ReturnDate": "2023-11-05T11:01:17.961Z"
+      }
+    },
+    {
+      "BookID": "27386f45-e4aa-4dd1-a3bf-0eb7953ac9cb",
+      "ISBN": "978-1-933624-76-1",
+      "BorrowingStatus": "Checked Out",
+      "Title": "Concrete mathematics",
+      "Author": "John Doe",
+      "ImageURL": "https://openlibrary.org/books/OL31826346M/ABC_Danny",
+      "BorrowedRecord": {
+        "BorrowerID": "user1",
+        "BorrowedDate": "2023-11-04T10:21:09.101Z",
+        "ReturnDate": "2023-11-05T10:21:09.101Z"
+      }
+    }
+  ]
+}

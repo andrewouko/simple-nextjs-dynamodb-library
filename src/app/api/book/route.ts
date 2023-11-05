@@ -29,8 +29,8 @@ import {
   isBookExist,
   jsonResponse
 } from "@lib/utils";
-import { v4 as uuidv4 } from "uuid";
 import { SafeParseReturnType } from "zod";
+import { randomUUID } from 'crypto';
 
 // create new Book in Library
 export async function POST(req: Request): Promise<Response> {
@@ -38,7 +38,7 @@ export async function POST(req: Request): Promise<Response> {
   if (request_body instanceof Response) return request_body;
 
   // valdate the request
-  request_body.BookID = uuidv4();
+  request_body.BookID = randomUUID();
   request_body.BorrowingStatus = BorrowingStatus.Available;
   const validation_result = validatePostRequest(request_body);
   if (!validation_result.success) {

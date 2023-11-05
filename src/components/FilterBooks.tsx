@@ -36,7 +36,7 @@ const FilterBooks = ({ onFilter }: Props) => {
   };
 
   return (
-    <Flex justifyContent="space-between" mb={4}>
+    <Flex justifyContent="space-between" mb={4} data-testid="books-filter">
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={[2, 4, 10]} direction={["column", "row"]} mb={2}>
           <FormControl isInvalid={errors.Title ? true : false}>

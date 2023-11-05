@@ -9,6 +9,7 @@ import {
   Text,
   Link,
   useMediaQuery,
+  Tooltip,
 } from "@chakra-ui/react";
 import { RefetchContext, UserContext } from "@lib/contexts";
 import {
@@ -23,7 +24,11 @@ import {
   BorrowingStatus,
   UpdateBook,
 } from "@lib/types";
-import { getQueryErrorToastOptions, getUser, useContextSafely } from "@lib/utils";
+import {
+  getQueryErrorToastOptions,
+  getUser,
+  useContextSafely,
+} from "@lib/utils";
 import { createColumnHelper } from "@tanstack/react-table";
 import React, { useEffect } from "react";
 import BookFormModal from "./BookFormModal";
@@ -31,8 +36,6 @@ import BorrowedRecordModal from "./BorrowedRecordModal";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { DataTable } from "./DataTable";
 import { DeleteIcon, EditIcon, ViewIcon } from "@chakra-ui/icons";
-
-const LARGE_SCREEN_WIDTH = window.innerWidth > 768;
 
 export default function BookTable({ data }: Props) {
   const { data: userId } = useContextSafely(UserContext);
@@ -71,7 +74,7 @@ export default function BookTable({ data }: Props) {
   );
   const [deleteId, setDeleteId] = React.useState<Borrow | undefined>(undefined);
   const { data: refetch } = useContextSafely(RefetchContext);
-  const [isLargerThan768] = useMediaQuery('(min-width: 768px)')
+  const [isLargerThan768] = useMediaQuery("(min-width: 768px)");
 
   const handleViewBorrower = (borrower: BorrowedRecord, BookID: BookID) => {
     setSelectedBorrower(borrower);
@@ -121,6 +124,9 @@ export default function BookTable({ data }: Props) {
     columnHelper.accessor("Title", {
       header: "Title",
     }),
+    columnHelper.accessor("ISBN", {
+      header: "ISBN Code",
+    }),
     columnHelper.accessor("BookID", {
       header: "Actions",
       cell: (info) => (
@@ -130,7 +136,9 @@ export default function BookTable({ data }: Props) {
             size="sm"
             onClick={() => handleEditBook(info.row.original)}
           >
-            <EditIcon />
+            <Tooltip label="Edit Book" fontSize="sm">
+              <EditIcon />
+            </Tooltip>
           </Button>
           {info.row.original.BorrowingStatus == BorrowingStatus.Available && (
             <Button
@@ -158,7 +166,9 @@ export default function BookTable({ data }: Props) {
                 if (borrower) handleViewBorrower(borrower, { BookID, ISBN });
               }}
             >
-              <ViewIcon />
+              <Tooltip label="View Borrower" fontSize="sm">
+                <ViewIcon />
+              </Tooltip>
             </Button>
           )}
           <Button
@@ -168,53 +178,58 @@ export default function BookTable({ data }: Props) {
               handleDeleteConfirm({
                 BookID: info.row.original.BookID,
                 ISBN: info.row.original.ISBN,
-                BorrowerID: userId
+                BorrowerID: userId,
               });
             }}
           >
-            <DeleteIcon />
+            <Tooltip label="Delete Book" fontSize="sm">
+              <DeleteIcon />
+            </Tooltip>
           </Button>
         </HStack>
       ),
     }),
-  ]
-  const columns = isLargerThan768 ? [
-    mobile_columns[0],
-    columnHelper.accessor("ISBN", {
-      header: "ISBN Code",
-    }),
-    columnHelper.accessor("Author", {
-      header: "Author",
-    }),
-    columnHelper.accessor("ImageURL", {
-      header: "Image URL",
-      cell: (info) => {
-        const url =  new URL(info.getValue());
-        return (
-          <Text>
-            Link:{" "}
-            <Link color="teal.500" href={info.getValue()} isExternal>
-              {url.hostname}
-            </Link>
-          </Text>
-        );
-      },
-    }),
-    columnHelper.accessor("BorrowingStatus", {
-      header: "Borrowing Status",
-      cell: (info) => (
-        <Badge colorScheme={info.getValue() === "Available" ? "green" : "red"}>
-          {info.getValue()}
-        </Badge>
-      ),
-    }),
-    mobile_columns[1]
-  ] : mobile_columns;
+  ];
+  const columns = isLargerThan768
+    ? [
+        mobile_columns[0],
+        mobile_columns[1],
+        columnHelper.accessor("Author", {
+          header: "Author",
+        }),
+        columnHelper.accessor("ImageURL", {
+          header: "Image URL",
+          cell: (info) => {
+            const url = new URL(info.getValue());
+            return (
+              <Text>
+                Link:{" "}
+                <Link color="teal.500" href={info.getValue()} isExternal>
+                  {url.hostname}
+                </Link>
+              </Text>
+            );
+          },
+        }),
+        columnHelper.accessor("BorrowingStatus", {
+          header: "Borrowing Status",
+          cell: (info) => (
+            <Badge
+              colorScheme={info.getValue() === "Available" ? "green" : "red"}
+            >
+              {info.getValue()}
+            </Badge>
+          ),
+        }),
+        mobile_columns[mobile_columns.length - 1],
+      ]
+    : mobile_columns;
 
-  if (isLoading || isDeleteLoading) return <Progress size="lg" isIndeterminate />;
+  if (isLoading || isDeleteLoading)
+    return <Progress size="lg" isIndeterminate />;
 
   return (
-    <>
+    <div data-testid="book-table">
       <DataTable columns={columns} data={data} />
       {selectedBorrower && selectedBookID && (
         <BorrowedRecordModal
@@ -240,7 +255,7 @@ export default function BookTable({ data }: Props) {
           onConfirm={handleDeleteBook}
         />
       )}
-    </>
+    </div>
   );
 }
 

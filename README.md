@@ -5,7 +5,7 @@ This is a [Next.js] Typescript project to showcase the use of DynamoDB. It repre
 1. @aws-sdk/client-dynamodb: client library for DynamoDB
 2. @aws-sdk/lib-dynamodb: tools for interacting with the DynamoDB library in an easier way.
 3. TypeScript compiler: for the setup of your application
-4. UUID: unique identifier generator
+<!-- 4. UUID: unique identifier generator -->
 5. ZOD: validation tool
 6. ChakraUI: rapid prototyping on the frontend
 7. ChakraUI Icons: icon library
@@ -54,3 +54,4 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## API Pages Collection
 https://api.postman.com/collections/3741573-cd9631c1-b934-4cff-8fb9-2945ce6b9bb0?access_key=PMAT-01HECEVA3N0GG9JNGSHN2GFNZM
+[Use import on Postman to get readonly access to the following private collection]

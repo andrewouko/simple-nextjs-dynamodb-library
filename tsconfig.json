@@ -22,10 +22,12 @@
       "@/*": ["./src/*"],
       "@config/*": ["./config/*"],
       "@lib/*":["./lib/*"],
-      "@components/*":["./src/components/*"]
+      "@components/*":["./src/components/*"],
+      "@mocks/*":["./lib/mocks/*"],
 
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "config/setup_library_table.js"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "types": ["node", "jest", "@testing-library/jest-dom"]
 }

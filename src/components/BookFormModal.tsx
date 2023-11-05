@@ -22,7 +22,6 @@ import { BookSchema, BorrowingStatus, UpdateBook } from "@lib/types";
 import { getQueryErrorToastOptions, useContextSafely } from "@lib/utils";
 import React, { useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { v4 as uuidv4 } from "uuid";
 
 const BookFormModal: React.FC<EditBookModalProps> = ({
   isOpen,
@@ -52,19 +51,33 @@ const BookFormModal: React.FC<EditBookModalProps> = ({
   const { data: refetch } = useContextSafely(RefetchContext);
   const toast = useToast();
   useEffect(() => {
-    if ((isError || isCreateError) && createError){
-      toast(getQueryErrorToastOptions(initialData === undefined ? "Create Book Error" : "Update Book Error", createError));
+    if ((isError || isCreateError) && createError) {
+      toast(
+        getQueryErrorToastOptions(
+          initialData === undefined ? "Create Book Error" : "Update Book Error",
+          createError
+        )
+      );
     }
     if (result || createResult) {
       refetch();
       onClose();
     }
-  }, [isError, toast, onClose, result, refetch, initialData, isCreateError, createResult, createError]);
+  }, [
+    isError,
+    toast,
+    onClose,
+    result,
+    refetch,
+    initialData,
+    isCreateError,
+    createResult,
+    createError,
+  ]);
 
   const onSubmit: SubmitHandler<UpdateBook> = (data) => {
     // console.log(data);
-    if(initialData)
-        return updateBook(data);
+    if (initialData) return updateBook(data);
     createBook(data);
   };
 
@@ -81,12 +94,12 @@ const BookFormModal: React.FC<EditBookModalProps> = ({
           <ModalCloseButton />
           <ModalBody>
             <FormControl isRequired isInvalid={errors.BookID ? true : false}>
-              <FormLabel>Book ID</FormLabel>
               <Input
                 placeholder="Book ID"
                 {...register("BookID")}
-                defaultValue={initialData?.BookID ?? uuidv4()}
+                defaultValue={initialData?.BookID ?? window.crypto.randomUUID()}
                 readOnly
+                type="hidden"
               />
               <FormErrorMessage>{errors?.BookID?.message}</FormErrorMessage>
             </FormControl>
@@ -150,7 +163,7 @@ const BookFormModal: React.FC<EditBookModalProps> = ({
             <Button
               colorScheme="teal"
               mr={3}
-              isLoading={isSubmitting}
+              disabled={isSubmitting}
               type="submit"
             >
               {initialData === undefined ? "Create" : "Save"}

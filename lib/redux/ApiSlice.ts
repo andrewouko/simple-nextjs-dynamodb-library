@@ -1,5 +1,5 @@
 "use client";
-import { Book, BookID, Borrow, GetBook, UpdateBook } from '@lib/types';
+import { Book, BookID, Borrow, GetBook, SuccessResponse, UpdateBook } from '@lib/types';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const BookAPI = createApi({
@@ -7,7 +7,7 @@ export const BookAPI = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
 
   endpoints: (builder) => ({
-    getBooks: builder.query({
+    getBooks: builder.query<SuccessResponse<Book[]>, GetBook>({
       query: (request_body: GetBook) => {
         let params: URLSearchParams;
         let url = `book`
