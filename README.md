@@ -55,3 +55,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ## API Pages Collection
 https://api.postman.com/collections/3741573-cd9631c1-b934-4cff-8fb9-2945ce6b9bb0?access_key=PMAT-01HECEVA3N0GG9JNGSHN2GFNZM
 [Use import on Postman to get readonly access to the following private collection]
+
+## TODO:
+1. Testing
+    - Add more tests for the frontend components
+    - Add tests for the api pages
